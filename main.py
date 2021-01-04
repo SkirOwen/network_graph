@@ -36,7 +36,7 @@ routes_2016["isOld"] = 0
 routes_tot = routes_2003.append(routes_2016, ignore_index=True)
 
 
-def network_graph(country, airports_names=airports_names, routes=routes_tot):
+def network_graph(country, airports_names=airports_names, routes=routes_tot, plot=True, output=False):
     airport_country_filter = "United States" if country.upper() == "USA" else country
     airports_country = airports_names[airports_names["country"] == airport_country_filter]
 
@@ -64,25 +64,29 @@ def network_graph(country, airports_names=airports_names, routes=routes_tot):
     edge_width = [(((weight - min(all_weights)) * (1 - 0.075)) / (max(all_weights) - min(all_weights))) + 0.075
                   for weight in all_weights]
 
-    crs = ccrs.PlateCarree()
-    fig, ax = plt.subplots(
-        1, 1, figsize=(12, 8),
-        subplot_kw=dict(projection=crs))
-    ax.coastlines()
-    ax.add_feature(cfeature.BORDERS)
-    # Extent of continental US.
-    ax.set_extent(COORDINATES[country])
-    ax.gridlines()
-    nx.draw_networkx(g, ax=ax,
-                     font_size=15,
-                     alpha=.5,
-                     width=edge_width,
-                     node_size=sizes,
-                     labels=labels,
-                     pos=pos,
-                     node_color=sizes,
-                     cmap=plt.cm.plasma)
-    plt.show()
+    if plot:
+        crs = ccrs.PlateCarree()
+        fig, ax = plt.subplots(
+            1, 1, figsize=(12, 8),
+            subplot_kw=dict(projection=crs))
+        ax.coastlines()
+        ax.add_feature(cfeature.BORDERS)
+        # Extent of continental US.
+        ax.set_extent(COORDINATES[country])
+        ax.gridlines()
+        nx.draw_networkx(g, ax=ax,
+                         font_size=15,
+                         alpha=.5,
+                         width=edge_width,
+                         node_size=sizes,
+                         labels=labels,
+                         pos=pos,
+                         node_color=sizes,
+                         cmap=plt.cm.plasma)
+        plt.show()
+
+    if output:
+        return airports_country, routes_country, g, weight_edges, pos, deg, sizes, labels, all_weights, edge_width
 
 
 # plot f degree distribution
