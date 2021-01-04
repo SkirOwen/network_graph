@@ -6,6 +6,7 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import collections
 from IPython.display import Image
+from networkx.algorithms import community
 import matplotlib
 matplotlib.rcParams['text.usetex'] = True
 plt.style.use('seaborn-whitegrid')
@@ -170,6 +171,7 @@ def degree_betweenness(G, deg, country):
     plt.xlabel(r"Weighted Degree")
     plt.show()
 
+
 # assortativity
 def assort(G):
     r = nx.degree_pearson_correlation_coefficient(G, weight="weight")
@@ -177,12 +179,27 @@ def assort(G):
 
 
 # core community size
-def core_community(G):
-    pass
+def core_community(G, country):
+    # does what is explained on slide 51 of AVDC_2019-2022_AIAS_Lecture_Graph & Visualisation.pdf
+    fig, ax = plt.subplots(1, 1, figsize=(17, 8))
+    time_label = ["2003-2009", "2010-2016", "2003-2016"]
+    color = ["#4C72B0", "#DD8452", "#55A868"]
+
+    s = []
+
+    for k in range(len(G)):
+        core = nx.k_core(G[k], core_number=nx.core_number(G[k]))
+        s.append(len(core))
+
+        nx.draw_networkx(core, ax=ax, label=time_label[k], alpha=0.75, node_color=color[k], edge_color=color[k])
+    plt.legend(loc="best")
+    plt.show()
+
+    return s
 
 
 if __name__ == "__main__":
-    country = "China"   # this to change
+    country = "Australia"   # this to change
     g_old = network_graph(country, routes=routes_2003, output_g=True)
     g_new = network_graph(country, routes=routes_2016, output_g=True)
     g_all = network_graph(country, output_g=True)
@@ -198,4 +215,7 @@ if __name__ == "__main__":
     r_old = assort(g_old)
     r_new = assort(g_new)
     r_all = assort(g_all)
-    print(country + " & " + str(r_old) + " & " + str(r_new) + " & " + str(r_all) + "\\")
+    print(country + " & " + str(r_old) + " & " + str(r_new) + " & " + str(r_all) + "\\\\")
+
+    s = core_community(G, country)
+    print(country + " & " + str(s[0]) + " & " + str(s[1]) + " & " + str(s[2]) + "\\\\")
