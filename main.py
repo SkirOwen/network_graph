@@ -207,10 +207,10 @@ if __name__ == "__main__":
     deg = [nx.degree(g_old, weight='weight'), nx.degree(g_new, weight='weight'), nx.degree(g_all, weight='weight')]
     G = [g_old, g_new, g_all]
 
+    degree_distribution(deg, country)
+
     # if deg and G is a list of old, new, and all than plot the three on one graph
     degree_betweenness(G, deg, country)
-
-    degree_distribution(deg, country)
 
     r_old = assort(g_old)
     r_new = assort(g_new)
