@@ -182,7 +182,7 @@ def core_community(G):
 
 
 if __name__ == "__main__":
-    country = "China"
+    country = "China"   # this to change
     g_old = network_graph(country, routes=routes_2003, output_g=True)
     g_new = network_graph(country, routes=routes_2016, output_g=True)
     g_all = network_graph(country, output_g=True)
