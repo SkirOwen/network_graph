@@ -133,18 +133,38 @@ def degree_distribution(deg, country):
 
 # degree vs betweenness distr
 def degree_betweenness(G, deg, country):
-    b = nx.betweenness_centrality(G, weight="weight", normalized=False)
-    x = [deg[iata] for iata in G.nodes]
-    y = [b[iata] for iata in G.nodes]
-    labels = [iata for iata in G.nodes]
-
+    # init the plot
     fig = plt.figure(figsize=(8, 8))
     ax = fig.add_subplot(1, 1, 1)
     ax.loglog()
-    plt.scatter(x, y, alpha=0.75)
-    for i in range(len(labels)):
-        ax.annotate(labels[i], (x[i], y[i]))
+
+    if len(deg) > 1:
+        time_label = ["2003-2009", "2010-2016", "2003-2016"]
+
+        for k in range(len(deg)):
+            b = nx.betweenness_centrality(G[k], weight="weight", normalized=False)
+            x = [deg[k][iata] for iata in G[k].nodes]
+            y = [b[iata] for iata in G[k].nodes]
+            labels = [iata for iata in G[k].nodes]
+
+            plt.scatter(x, y, alpha=0.75, label=time_label[k])
+            for i in range(len(labels)):
+                ax.annotate(labels[i], (x[i], y[i]))
+    else:
+        b = nx.betweenness_centrality(G, weight="weight", normalized=False)
+        x = [deg[iata] for iata in G.nodes]
+        y = [b[iata] for iata in G.nodes]
+        labels = [iata for iata in G.nodes]
+
+        fig = plt.figure(figsize=(8, 8))
+        ax = fig.add_subplot(1, 1, 1)
+        ax.loglog()
+        plt.scatter(x, y, alpha=0.75)
+        for i in range(len(labels)):
+            ax.annotate(labels[i], (x[i], y[i]))
+
     plt.ylim(0.1, 10000)
+    plt.legend(loc="best")
     plt.title(r'Degree vs Betweenness' + " for " + str(country))
     plt.ylabel(r"Betweenness")
     plt.xlabel(r"Weighted Degree")
@@ -162,12 +182,20 @@ def core_community(G):
 
 
 if __name__ == "__main__":
-    country = "Australia"
+    country = "China"
     g_old = network_graph(country, routes=routes_2003, output_g=True)
     g_new = network_graph(country, routes=routes_2016, output_g=True)
     g_all = network_graph(country, output_g=True)
 
     deg = [nx.degree(g_old, weight='weight'), nx.degree(g_new, weight='weight'), nx.degree(g_all, weight='weight')]
+    G = [g_old, g_new, g_all]
+
+    # if deg and G is a list of old, new, and all than plot the three on one graph
+    degree_betweenness(G, deg, country)
+
     degree_distribution(deg, country)
-    # r = assort(g, "Australia")
-    # print(r)
+
+    r_old = assort(g_old)
+    r_new = assort(g_new)
+    r_all = assort(g_all)
+    print(country + " & " + str(r_old) + " & " + str(r_new) + " & " + str(r_all) + "\\")
