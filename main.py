@@ -188,7 +188,12 @@ def core_community(G, country):
     s = []
 
     for k in range(len(G)):
-        core = nx.k_core(G[k], core_number=nx.core_number(G[k]))
+        try:
+            core = nx.k_core(G[k], core_number=nx.core_number(G[k]))
+        except nx.exception.NetworkXError:
+            g = G[k]
+            g.remove_edges_from(list(nx.selfloop_edges(g)))
+            core = nx.k_core(g, core_number=nx.core_number(g))
         s.append(len(core))
 
         nx.draw_networkx(core, ax=ax, label=time_label[k], alpha=0.75, node_color=color[k], edge_color=color[k])
@@ -199,7 +204,7 @@ def core_community(G, country):
 
 
 if __name__ == "__main__":
-    country = "Australia"   # this to change
+    country = "China"   # this to change
     g_old = network_graph(country, routes=routes_2003, output_g=True)
     g_new = network_graph(country, routes=routes_2016, output_g=True)
     g_all = network_graph(country, output_g=True)
@@ -207,7 +212,7 @@ if __name__ == "__main__":
     deg = [nx.degree(g_old, weight='weight'), nx.degree(g_new, weight='weight'), nx.degree(g_all, weight='weight')]
     G = [g_old, g_new, g_all]
 
-    degree_distribution(deg, country)
+    # degree_distribution(deg, country)
 
     # if deg and G is a list of old, new, and all than plot the three on one graph
     degree_betweenness(G, deg, country)
