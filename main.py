@@ -6,6 +6,9 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import collections
 from IPython.display import Image
+import matplotlib
+matplotlib.rcParams['text.usetex'] = True
+plt.style.use('seaborn-whitegrid')
 
 COUNTRIES = ["USA", "China", "United Kingdom", "Australia"]
 COORDINATES = {"USA": [-179, -66, 16, 60],
@@ -108,16 +111,44 @@ def network_graph(country, airports_names=airports_names, routes=routes_tot, plo
 
 
 # plot f degree distribution
-def degree_distribution(G):
-    degree_sequence = sorted([d for n, d in G.degree()], reverse=True)
-    degree_count = collections.Counter(degree_sequence)
-    deg, cnt = zip(*degree_count.items())
+def degree_distribution(deg, country):
+    if len(deg) > 1:
+        degree_sequence_old = sorted([d for n, d in deg[0]], reverse=True)
+        degree_sequence_new = sorted([d for n, d in deg[1]], reverse=True)
+        degree_sequence_all = sorted([d for n, d in deg[2]], reverse=True)
+
+        plt.semilogy(degree_sequence_old, marker="o", label="2003-2009")
+        plt.semilogy(degree_sequence_new, marker="o", label="2010-2016")
+        plt.semilogy(degree_sequence_all, marker="o", label="2003-2016")
+        plt.legend(loc="best")
+    else:
+        degree_sequence = sorted([d for n, d in deg[0]], reverse=True)
+        plt.semilogy(degree_sequence, marker="o")
+
+    plt.title(r'Degree Distribution' + " for " + str(country))
+    plt.ylabel(r"Weighted Degree")
+    plt.xlabel(r"Rank")
+    plt.show()
 
 
 # degree vs betweenness distr
-def degree_betweenness(G):
-    pass
+def degree_betweenness(G, deg, country):
+    b = nx.betweenness_centrality(G, weight="weight", normalized=False)
+    x = [deg[iata] for iata in G.nodes]
+    y = [b[iata] for iata in G.nodes]
+    labels = [iata for iata in G.nodes]
 
+    fig = plt.figure(figsize=(8, 8))
+    ax = fig.add_subplot(1, 1, 1)
+    ax.loglog()
+    plt.scatter(x, y, alpha=0.75)
+    for i in range(len(labels)):
+        ax.annotate(labels[i], (x[i], y[i]))
+    plt.ylim(0.1, 10000)
+    plt.title(r'Degree vs Betweenness' + " for " + str(country))
+    plt.ylabel(r"Betweenness")
+    plt.xlabel(r"Weighted Degree")
+    plt.show()
 
 # assortativity
 def assort(G):
@@ -131,6 +162,12 @@ def core_community(G):
 
 
 if __name__ == "__main__":
-    g = network_graph("Australia", output_g=True)
-    r = assort(g)
-    print(r)
+    country = "Australia"
+    g_old = network_graph(country, routes=routes_2003, output_g=True)
+    g_new = network_graph(country, routes=routes_2016, output_g=True)
+    g_all = network_graph(country, output_g=True)
+
+    deg = [nx.degree(g_old, weight='weight'), nx.degree(g_new, weight='weight'), nx.degree(g_all, weight='weight')]
+    degree_distribution(deg, country)
+    # r = assort(g, "Australia")
+    # print(r)
