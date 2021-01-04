@@ -13,10 +13,10 @@ COORDINATES = {"USA": [-179, -66, 16, 60],
                "United Kingdom": [-11, 2, 48, 60],
                "Australia": [111, 155, -42, -9]}
 
-LBL_W = {"USA": 50,
-         "China": 75,
-         "United Kingdom": 17,
-         "Australia": 20}
+LBL_W = {"USA": 213000,             # 50
+         "China": 51100,            # 75
+         "United Kingdom": 48700,   # 17
+         "Australia": 10704}           # 20
 
 WIDTH_C = {"USA": 0.5,
            "China": 0.75,
@@ -35,6 +35,10 @@ airports_names = airports_names.set_index("id")
 # remove data for countries not USA, China, UK, and Australia
 routes_2003 = routes_2003[routes_2003["Source Country"].isin(COUNTRIES)].reset_index(drop=True)
 routes_2016 = routes_2016[routes_2016["Source Country"].isin(COUNTRIES)].reset_index(drop=True)
+
+# makes sure weight is int
+routes_2003["Weight"] = routes_2003["Weight"].astype(int)
+routes_2016["Weight"] = routes_2016["Weight"].astype(int)
 
 # ignoring time series as 2016 doesn't have it
 routes_2003 = routes_2003.drop(["TimeSeries"], axis=1)
@@ -65,13 +69,14 @@ def network_graph(country, airports_names=airports_names, routes=routes_tot, plo
     pos = {airport: (v["Lon"], v["Lat "]) for airport, v in
            airports_country.to_dict('index').items()}
 
-    deg = nx.degree(g)
-    sizes = [2 * deg[iata] for iata in g.nodes]
+    deg = nx.degree(g, weight='weight')
+    all_sizes = [deg[iata] for iata in g.nodes]
+    sizes = [(((deg[iata] - min(all_sizes)) * (300 - 17)) / (max(all_sizes) - min(all_sizes))) + 1 for iata in g.nodes]
 
     labels = {iata: iata if deg[iata] >= LBL_W[country] else ''
               for iata in g.nodes}
 
-    all_weights = [int(data['weight']) for node1, node2, data in g.edges(data=True)]
+    all_weights = [data['weight'] for node1, node2, data in g.edges(data=True)]
     edge_width = [(((weight - min(all_weights)) * (WIDTH_C[country] - 0.075)) / (max(all_weights) - min(all_weights))) + 0.075
                   for weight in all_weights]
 
@@ -123,4 +128,4 @@ def core_community(G):
 
 
 if __name__ == "__main__":
-    network_graph("Australia")
+    network_graph("UK")
