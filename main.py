@@ -50,7 +50,7 @@ routes_2016["isOld"] = 0
 routes_tot = routes_2003.append(routes_2016, ignore_index=True)
 
 
-def network_graph(country, airports_names=airports_names, routes=routes_tot, plot=True, output=False):
+def network_graph(country, airports_names=airports_names, routes=routes_tot, plot=True, output_g=False, output_all=False):
     country = "United Kingdom" if country.upper() == "UK" else country
     airport_country_filter = "United States" if country.upper() == "USA" else country
     airports_country = airports_names[airports_names["country"] == airport_country_filter]
@@ -101,8 +101,10 @@ def network_graph(country, airports_names=airports_names, routes=routes_tot, plo
                          cmap=plt.cm.plasma)
         plt.show()
 
-    if output:
+    if output_all:
         return airports_country, routes_country, g, weight_edges, pos, deg, sizes, labels, all_weights, edge_width
+    if output_g:
+        return g
 
 
 # plot f degree distribution
@@ -119,7 +121,8 @@ def degree_betweenness(G):
 
 # assortativity
 def assort(G):
-    pass
+    r = nx.degree_pearson_correlation_coefficient(G, weight="weight")
+    return r
 
 
 # core community size
@@ -128,4 +131,6 @@ def core_community(G):
 
 
 if __name__ == "__main__":
-    network_graph("UK")
+    g = network_graph("Australia", output_g=True)
+    r = assort(g)
+    print(r)
