@@ -220,7 +220,7 @@ if __name__ == "__main__":
     r_old = assort(g_old)
     r_new = assort(g_new)
     r_all = assort(g_all)
-    print(country + " & " + str(r_old) + " & " + str(r_new) + " & " + str(r_all) + "\\\\")
+    print(f"{country} & {r_old} & {r_new} % {r_all} \\\\")
 
     s = core_community(G, country)
-    print(country + " & " + str(s[0]) + " & " + str(s[1]) + " & " + str(s[2]) + "\\\\")
+    print(f"{country} & {s[0]} & {s[1]} % {s[2]} \\\\")
